@@ -1,0 +1,503 @@
+{
+  "eventName": "Gala MNT Studio Dance",
+  "venueName": "Théâtre de Sénart, Lieusaint",
+  "sections": [
+    {
+      "id": "BGH",
+      "name": "Balcon Gauche",
+      "color": "#c9a24b",
+      "price": 20,
+      "gridColumn": 1,
+      "gridRow": 1,
+      "rows": [
+        {
+          "label": "S",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "T",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "U",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "V",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "W",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "X",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "Y",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        }
+      ]
+    },
+    {
+      "id": "BCH",
+      "name": "Balcon Centre",
+      "color": "#d8b768",
+      "price": 25,
+      "gridColumn": 2,
+      "gridRow": 1,
+      "rows": [
+        {
+          "label": "Q",
+          "seatCount": 20,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "R",
+          "seatCount": 14,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "S",
+          "seatCount": 20,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "T",
+          "seatCount": 20,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "U",
+          "seatCount": 20,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "V",
+          "seatCount": 20,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "W",
+          "seatCount": 12,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "X",
+          "seatCount": 20,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "Y",
+          "seatCount": 20,
+          "startNumber": 1,
+          "removed": []
+        }
+      ]
+    },
+    {
+      "id": "BDH",
+      "name": "Balcon Droit",
+      "color": "#c9a24b",
+      "price": 20,
+      "gridColumn": 3,
+      "gridRow": 1,
+      "rows": [
+        {
+          "label": "S",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "T",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "U",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "V",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "W",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "X",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "Y",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        }
+      ]
+    },
+    {
+      "id": "OGB",
+      "name": "Orchestre Gauche",
+      "color": "#8a1c2d",
+      "price": 35,
+      "gridColumn": 1,
+      "gridRow": 2,
+      "rows": [
+        {
+          "label": "A",
+          "seatCount": 6,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "B",
+          "seatCount": 6,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "C",
+          "seatCount": 7,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "D",
+          "seatCount": 7,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "E",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "F",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "G",
+          "seatCount": 9,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "H",
+          "seatCount": 9,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "I",
+          "seatCount": 9,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "J",
+          "seatCount": 9,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "K",
+          "seatCount": 10,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "L",
+          "seatCount": 10,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "M",
+          "seatCount": 10,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "N",
+          "seatCount": 11,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "O",
+          "seatCount": 11,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "P",
+          "seatCount": 11,
+          "startNumber": 1,
+          "removed": [
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "OCB",
+      "name": "Orchestre Centre",
+      "color": "#b03a3a",
+      "price": 40,
+      "gridColumn": 2,
+      "gridRow": 2,
+      "rows": [
+        {
+          "label": "A",
+          "seatCount": 10,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "B",
+          "seatCount": 10,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "C",
+          "seatCount": 11,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "D",
+          "seatCount": 11,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "E",
+          "seatCount": 12,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "F",
+          "seatCount": 12,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "G",
+          "seatCount": 13,
+          "startNumber": 1,
+          "removed": [
+            1,
+            2,
+            12,
+            13
+          ]
+        },
+        {
+          "label": "H",
+          "seatCount": 13,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "I",
+          "seatCount": 13,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "J",
+          "seatCount": 13,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "K",
+          "seatCount": 14,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "L",
+          "seatCount": 14,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "M",
+          "seatCount": 14,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "N",
+          "seatCount": 15,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "O",
+          "seatCount": 15,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "P",
+          "seatCount": 15,
+          "startNumber": 1,
+          "removed": []
+        }
+      ]
+    },
+    {
+      "id": "ODB",
+      "name": "Orchestre Droit",
+      "color": "#8a1c2d",
+      "price": 35,
+      "gridColumn": 3,
+      "gridRow": 2,
+      "rows": [
+        {
+          "label": "A",
+          "seatCount": 6,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "B",
+          "seatCount": 6,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "C",
+          "seatCount": 7,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "D",
+          "seatCount": 7,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "E",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "F",
+          "seatCount": 8,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "G",
+          "seatCount": 9,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "H",
+          "seatCount": 9,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "I",
+          "seatCount": 9,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "J",
+          "seatCount": 9,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "K",
+          "seatCount": 10,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "L",
+          "seatCount": 10,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "M",
+          "seatCount": 10,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "N",
+          "seatCount": 11,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "O",
+          "seatCount": 11,
+          "startNumber": 1,
+          "removed": []
+        },
+        {
+          "label": "P",
+          "seatCount": 11,
+          "startNumber": 1,
+          "removed": [
+            10,
+            11
+          ]
+        }
+      ]
+    }
+  ]
+}
