@@ -38,6 +38,7 @@ export default function ClientFlow({ eventId }) {
   const [seatsById, setSeatsById] = useState(new Map());
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [ticketSeats, setTicketSeats] = useState([]);
+  const [holders, setHolders] = useState({}); // seatId -> nom et prénom du titulaire du billet
   const [emailAddress, setEmailAddress] = useState('');
   const [emailStatus, setEmailStatus] = useState('idle'); // idle | sending | sent | error
   const [emailErrorMsg, setEmailErrorMsg] = useState('');
@@ -133,10 +134,12 @@ export default function ClientFlow({ eventId }) {
         const seatSnaps = await Promise.all(seatRefs.map((ref) => tx.get(ref)));
 
         seatSnaps.forEach((snap) => {
-          if (!snap.exists()) throw new Error('SEAT_MISSING');
+          const fail = (code, detail) => Object.assign(new Error(code), { detail });
+          if (!snap.exists()) throw fail('SEAT_MISSING', `place ${snap.id}`);
           const data = snap.data();
-          if (data.status !== 'available') throw new Error('SEAT_TAKEN');
-          if (data.sectionName !== currentBooking.category) throw new Error('WRONG_CATEGORY');
+          if (data.status !== 'available') throw fail('SEAT_TAKEN', `place ${snap.id}, statut « ${data.status} »`);
+          if (data.sectionName !== currentBooking.category)
+            throw fail('WRONG_CATEGORY', `place ${snap.id} : bloc « ${data.sectionName} » ≠ catégorie « ${currentBooking.category} »`);
         });
 
         seatRefs.forEach((ref) => {
@@ -153,27 +156,33 @@ export default function ClientFlow({ eventId }) {
       setTicketSeats(seats);
       setStep('success');
     } catch (err) {
+      console.error(err);
       const msg = ERROR_MESSAGES[err.message] || 'Une erreur est survenue, merci de réessayer.';
-      setError(msg);
+      setError(err.detail ? `${msg} (${err.detail})` : msg);
     }
     setLoading(false);
   }
 
+  // Billets avec le nom de leur titulaire (saisi par le client avant génération)
+  const namedSeats = ticketSeats.map((s) => ({ ...s, holder: (holders[s.seatId] || '').trim() }));
+  const allNamed = ticketSeats.length > 0 && namedSeats.every((s) => s.holder.length >= 2);
+
   async function handleDownload() {
+    if (!allNamed) return;
     await generateTicketsPdf({
       event: {
         eventName: config?.eventName,
         eventDates: eventLabel(eventId),
         venueName: config?.venueName,
       },
-      seats: ticketSeats,
+      seats: namedSeats,
       transactionId,
     });
   }
 
   async function handleEmailSend(e) {
     e.preventDefault();
-    if (!emailAddress.trim()) return;
+    if (!emailAddress.trim() || !allNamed) return;
     setEmailStatus('sending');
     setEmailErrorMsg('');
     try {
@@ -184,7 +193,7 @@ export default function ClientFlow({ eventId }) {
           eventDates: eventLabel(eventId),
           venueName: config?.venueName,
         },
-        seats: ticketSeats,
+        seats: namedSeats,
         transactionId,
       });
       setEmailStatus('sent');
@@ -275,9 +284,40 @@ export default function ClientFlow({ eventId }) {
             {ticketSeats.length} place{ticketSeats.length > 1 ? 's' : ''} —{' '}
             {ticketSeats.map((s) => `${s.row}${s.number}`).join(', ')}
           </p>
-          <button className="btn btn-primary" onClick={handleDownload} style={{ marginTop: '1rem' }}>
+          <div style={{ textAlign: 'left', marginTop: '1.25rem' }}>
+            <p style={{ color: 'var(--cream-dim)', fontSize: '0.9rem', margin: '0 0 0.75rem' }}>
+              Indiquez le <strong>nom et prénom</strong> de la personne pour chaque billet — il sera imprimé dessus :
+            </p>
+            {ticketSeats.map((s) => (
+              <div key={s.seatId} style={{ marginBottom: '0.7rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--gold-soft)', marginBottom: '0.25rem' }}>
+                  {s.sectionName} — Rang {s.row}, Siège {s.number}
+                </label>
+                <input
+                  type="text"
+                  autoComplete="off"
+                  required
+                  placeholder="Nom et prénom"
+                  value={holders[s.seatId] || ''}
+                  onChange={(e) => setHolders((h) => ({ ...h, [s.seatId]: e.target.value }))}
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+            ))}
+          </div>
+          <button
+            className="btn btn-primary"
+            onClick={handleDownload}
+            disabled={!allNamed}
+            style={{ marginTop: '1rem' }}
+          >
             Télécharger mes billets (PDF)
           </button>
+          {!allNamed && (
+            <p style={{ color: 'var(--cream-dim)', fontSize: '0.78rem', margin: '0.5rem 0 0' }}>
+              Renseignez un nom pour chaque billet pour pouvoir le télécharger.
+            </p>
+          )}
 
           {isEmailDeliveryConfigured() && (
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #3a2c30' }}>
@@ -296,7 +336,7 @@ export default function ClientFlow({ eventId }) {
                     placeholder="votre@email.com"
                     style={{ flex: 1 }}
                   />
-                  <button className="btn btn-small" type="submit" disabled={emailStatus === 'sending'}>
+                  <button className="btn btn-small" type="submit" disabled={emailStatus === 'sending' || !allNamed}>
                     {emailStatus === 'sending' ? 'Envoi…' : 'Envoyer'}
                   </button>
                 </form>
