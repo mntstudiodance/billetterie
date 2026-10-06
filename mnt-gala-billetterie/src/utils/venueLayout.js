@@ -16,6 +16,18 @@ const MARGIN = 70;
 const TOP = 230; // début des blocs sous la scène
 const CURVE = 4e-5; // légère courbure des rangées
 
+// Alignement des rangées dans un bloc quand elles n'ont pas toutes le même nombre
+// de places : les blocs « gauche » sont calés à droite (côté allée centrale), les
+// blocs « droit » calés à gauche, les autres centrés. Peut être forcé par
+// section.align = 'left' | 'right' | 'center' dans la configuration.
+function alignOf(section) {
+  if (['left', 'right', 'center'].includes(section.align)) return section.align;
+  const n = (section.name || '').toLowerCase();
+  if (/\bgauche\b/.test(n)) return 'right';
+  if (/\bdroit(e)?\b/.test(n)) return 'left';
+  return 'center';
+}
+
 export function layoutVenue(eventId, config) {
   const sections = config?.sections || [];
   const maxCol = Math.max(1, ...sections.map((s) => s.gridColumn || 1));
@@ -62,7 +74,11 @@ export function layoutVenue(eventId, config) {
     blocks.push({ id: section.id, name: section.name, color: section.color || '#c9a24b', x: sx, y: sy, w: i.w, h: i.h });
     i.rows.forEach((r, ri) => {
       const n = r.numbers.length;
-      const x0 = sx + (i.w - n * SP) / 2;
+      const align = alignOf(section);
+      const x0 =
+        align === 'right' ? sx + i.w - GUTTER - n * SP
+        : align === 'left' ? sx + GUTTER
+        : sx + (i.w - n * SP) / 2;
       const baseY = sy + HEAD + ri * RG + RG / 2;
       if (n > 0) {
         rowLabels.push({ text: r.label, x: x0 - 16, y: baseY + curve(x0) });
