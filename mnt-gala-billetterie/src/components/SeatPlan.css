@@ -1,137 +1,65 @@
-.seatplan-empty {
-  color: var(--cream-dim);
-  font-style: italic;
-}
+.seatplan-empty { color: var(--cream-dim); font-style: italic; }
 
 .seatplan-wrap {
+  position: relative;
   width: 100%;
-  overflow-x: auto;
-  padding: 1.5rem 1rem 2.5rem;
-  border: 1px solid #3a2c30;
+  height: min(78vh, 800px);
+  min-height: 460px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 14px;
-  background: linear-gradient(180deg, #1c1315 0%, var(--ink) 100%);
+  overflow: hidden;
+  background: #0a0d14;
 }
-
-.seatplan-stage {
-  margin: 0 auto 2rem;
-  max-width: 640px;
-  text-align: center;
-  padding: 0.6em 0;
-  font-family: var(--font-display);
-  letter-spacing: 0.35em;
-  font-size: 0.8rem;
-  color: var(--ink);
-  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 50%, var(--gold) 100%);
-  border-radius: 999px;
-  box-shadow: 0 0 24px rgba(201, 162, 75, 0.35);
+.seatcanvas { position: absolute; inset: 0; touch-action: none; user-select: none; -webkit-user-select: none; }
+.seatcanvas-cv { display: block; touch-action: none; }
+.seatcanvas-mini {
+  position: absolute; right: 10px; bottom: 10px; overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px;
+  background: rgba(10, 13, 20, 0.85); box-shadow: 0 0 22px rgba(212, 175, 55, 0.22);
+  transition: bottom 0.3s;
 }
+.seatcanvas-mini.is-shifted { bottom: 190px; }
+.seatcanvas-mini canvas { display: block; touch-action: none; }
 
-.seatplan-grid {
-  display: inline-grid;
-  gap: 1.75rem 2.5rem;
-  margin: 0 auto;
-  justify-content: center;
+.seatplan-zoom {
+  position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column;
+  border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; overflow: hidden;
+  background: rgba(10, 13, 20, 0.85);
 }
-
-.seatplan-section {
-  border: 1px dashed color-mix(in srgb, var(--section-color) 55%, transparent);
-  border-radius: 10px;
-  padding: 0.9rem 1rem 1.1rem;
+.seatplan-zoom button {
+  width: 40px; height: 40px; background: none; border: 0; color: #d4af37;
+  font-size: 1.2rem; cursor: pointer;
 }
+.seatplan-zoom button + button { border-top: 1px solid rgba(212, 175, 55, 0.2); }
+.seatplan-zoom button:active { background: rgba(255, 255, 255, 0.1); }
 
-.seatplan-section-name {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  color: var(--section-color, var(--gold));
-  margin-bottom: 0.6rem;
-  text-align: center;
-  font-weight: 600;
+.seatplan-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  max-width: 560px; margin: 0 auto; box-sizing: border-box;
+  padding: 0.8rem 1.25rem calc(1.2rem + env(safe-area-inset-bottom));
+  border-radius: 22px 22px 0 0; border-top: 1px solid rgba(212, 175, 55, 0.45);
+  background: rgba(15, 20, 32, 0.96); backdrop-filter: blur(14px);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.6), 0 -1px 30px rgba(212, 175, 55, 0.18);
+  color: var(--cream);
 }
-
-.seatplan-section-rows {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.seatplan-sheet-grip { width: 46px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.2); margin: 0 auto 0.9rem; }
+.seatplan-sheet-top { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.seatplan-sheet-bloc { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: #d4af37; margin: 0; }
+.seatplan-sheet-title { font-family: var(--font-display); font-size: 1.5rem; margin: 0.25rem 0 0; color: #f1e3b5; line-height: 1.15; }
+.seatplan-sheet-price { font-weight: 700; font-size: 1.1rem; text-align: right; }
+.seatplan-sheet-note { margin: 0.6rem 0 0; font-size: 0.82rem; color: var(--cream-dim); }
+.seatplan-sheet-actions { display: flex; gap: 0.7rem; margin-top: 1rem; }
+.seatplan-sheet-btn {
+  flex: 1; padding: 0.95rem 1rem; border-radius: 14px; border: 0; cursor: pointer;
+  font-weight: 700; font-size: 1rem; color: #0a0d14;
+  background: linear-gradient(90deg, #d4af37, #f1d77a, #d4af37);
+  box-shadow: 0 0 26px rgba(212, 175, 55, 0.4);
 }
-
-.seatplan-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.32rem;
-  flex-shrink: 0;
-  flex-wrap: nowrap;
-}
-
-.seatplan-row-label {
-  width: 1.4rem;
-  flex-shrink: 0;
-  text-align: right;
-  font-size: 0.7rem;
-  color: var(--cream-dim);
-}
-
-.seatplan-seats {
-  display: flex;
-  gap: 0.28rem;
-  flex-wrap: nowrap;
-  flex-shrink: 0;
-}
-
-.seat {
-  width: 1.5rem;
-  height: 1.5rem;
-  flex-shrink: 0;
-  border-radius: 5px;
-  font-size: 0.62rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
-  padding: 0;
-  transition: transform 0.1s ease, box-shadow 0.15s ease;
-}
-
-.seat-available {
-  background: transparent;
-  border-color: var(--section-color, var(--gold));
-  color: var(--cream-dim);
-}
-
-.seat-dimmed {
-  background: transparent;
-  border-color: #3a2c30;
-  color: #4a3f42;
-}
-
-.seat-sold {
-  background: var(--sold);
-  border-color: var(--sold);
-  color: #7a7075;
-  cursor: not-allowed;
-}
-
-.seat-blocked {
-  background: #5b4a7a;
-  border-color: #5b4a7a;
-  color: #d8cbe8;
-}
-
-.seat-selected {
-  background: var(--gold);
-  border-color: var(--gold);
-  color: var(--ink);
-  box-shadow: 0 0 10px rgba(201, 162, 75, 0.7);
-  font-weight: 700;
-}
-
-.seat-clickable {
-  cursor: pointer;
-}
-
-.seat-clickable:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 8px rgba(201, 162, 75, 0.5);
+.seatplan-sheet-btn[disabled] { opacity: 0.4; box-shadow: none; cursor: not-allowed; }
+.seatplan-sheet-btn.is-remove { background: transparent; color: #f1e3b5; border: 1px solid #d4af37; box-shadow: none; }
+.seatplan-sheet-cancel {
+  padding: 0.95rem 1.1rem; border-radius: 14px; background: none; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.18); color: var(--cream-dim); font-size: 0.9rem;
 }
 
 .seatplan-legend {

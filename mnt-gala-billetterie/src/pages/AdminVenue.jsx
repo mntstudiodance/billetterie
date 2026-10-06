@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { collection, doc, getDoc, getDocs, query, setDoc, where, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
 import SeatPlan from '../components/SeatPlan';
-import { buildSeatList, chunk, countSeatsInSection, parseRemovedList } from '../utils/seatMap';
+import { buildSeatList, chunk, countSeatsInSection, generateCenterOutNumbers, generateSequentialNumbers, parseSeatNumberList, rowSeatNumbers } from '../utils/seatMap';
 import { EVENTS } from '../utils/events';
 
 const EMPTY_CONFIG = {
@@ -72,10 +72,7 @@ export default function AdminVenue() {
         s.id === sectionId
           ? {
               ...s,
-              rows: [
-                ...s.rows,
-                { label: String.fromCharCode(65 + s.rows.length), seatCount: 10, startNumber: 1, removed: [] },
-              ],
+              rows: [...s.rows, { label: String.fromCharCode(65 + s.rows.length), seats: [] }],
             }
           : s
       ),
@@ -91,6 +88,31 @@ export default function AdminVenue() {
           : s
       ),
     }));
+  }
+
+  function fillRowSeats(sectionId, index, numbers) {
+    updateRow(sectionId, index, 'seats', numbers);
+  }
+
+  function handleGenerateSequential(sectionId, index) {
+    const countStr = prompt('Combien de sièges dans cette rangée ?', '10');
+    if (countStr === null) return;
+    const count = parseInt(countStr, 10);
+    if (!count || count < 1) return;
+    const startStr = prompt('Numéro de départ ?', '1');
+    if (startStr === null) return;
+    const start = parseInt(startStr, 10) || 1;
+    fillRowSeats(sectionId, index, generateSequentialNumbers(count, start));
+  }
+
+  function handleGenerateCenterOut(sectionId, index) {
+    const leftStr = prompt('Combien de sièges à GAUCHE du centre (numéros pairs) ?', '6');
+    if (leftStr === null) return;
+    const left = parseInt(leftStr, 10) || 0;
+    const rightStr = prompt('Combien de sièges à DROITE du centre (numéros impairs) ?', '6');
+    if (rightStr === null) return;
+    const right = parseInt(rightStr, 10) || 0;
+    fillRowSeats(sectionId, index, generateCenterOutNumbers(left, right));
   }
 
   function removeRow(sectionId, index) {
@@ -335,51 +357,53 @@ export default function AdminVenue() {
                 <thead>
                   <tr>
                     <th>Rangée</th>
-                    <th>Nb de sièges</th>
-                    <th>1er numéro</th>
-                    <th>Sièges à retirer</th>
+                    <th>Numéros des sièges (de gauche à droite)</th>
+                    <th>Total</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {section.rows.map((row, i) => (
+                  {section.rows.map((row, i) => {
+                    const numbers = rowSeatNumbers(row);
+                    return (
                     <tr key={i}>
                       <td>
                         <input style={{ width: 60 }} value={row.label} onChange={(e) => updateRow(section.id, i, 'label', e.target.value)} />
                       </td>
                       <td>
                         <input
-                          style={{ width: 90 }}
-                          type="number"
-                          min={1}
-                          value={row.seatCount}
-                          onChange={(e) => updateRow(section.id, i, 'seatCount', Number(e.target.value))}
+                          key={i + '-' + numbers.join(',')}
+                          style={{ width: 340 }}
+                          placeholder="ex : 12,10,8,6,4,2,1,3,5,7,9,11"
+                          defaultValue={numbers.join(', ')}
+                          onBlur={(e) => updateRow(section.id, i, 'seats', parseSeatNumberList(e.target.value))}
                         />
+                        <div style={{ marginTop: '0.35rem', display: 'flex', gap: '0.4rem' }}>
+                          <button
+                            type="button"
+                            className="btn btn-small"
+                            onClick={() => handleGenerateSequential(section.id, i)}
+                          >
+                            Suite 1,2,3…
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-small"
+                            onClick={() => handleGenerateCenterOut(section.id, i)}
+                          >
+                            Pair/impair depuis le centre
+                          </button>
+                        </div>
                       </td>
-                      <td>
-                        <input
-                          style={{ width: 90 }}
-                          type="number"
-                          min={1}
-                          value={row.startNumber}
-                          onChange={(e) => updateRow(section.id, i, 'startNumber', Number(e.target.value))}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          style={{ width: 160 }}
-                          placeholder="ex : 3, 7, 9"
-                          defaultValue={(row.removed || []).join(', ')}
-                          onBlur={(e) => updateRow(section.id, i, 'removed', parseRemovedList(e.target.value))}
-                        />
-                      </td>
+                      <td>{numbers.length}</td>
                       <td>
                         <button className="btn btn-small btn-danger" onClick={() => removeRow(section.id, i)}>
                           ✕
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
               <button className="btn btn-small" style={{ marginTop: '0.6rem' }} onClick={() => addRow(section.id)}>

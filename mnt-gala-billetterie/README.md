@@ -11,22 +11,33 @@ Il y a **deux représentations indépendantes** : samedi 5 juin et dimanche 6 ju
 Chacune a son propre plan de salle, ses propres places, et ses propres transactions.
 
 1. **Toi (admin)** choisis une date dans l'onglet *Plan de salle*, configures les
-   catégories (ex : Balcon Gauche Haut, Orchestre Centre Bas…), leurs rangées et
-   leur nombre de sièges, puis cliques sur *Générer les places manquantes* pour créer
-   chaque siège dans la base. Le bouton *Copier le plan de l'autre date* permet de ne
-   dessiner la salle qu'une fois. Tu peux à tout moment retirer un siège précis d'une
-   rangée (ex : pour une place PMR) via le champ "Sièges à retirer" (numéros séparés
-   par des virgules).
+   catégories (ex : Balcon Gauche Haut, Orchestre Centre Bas…), puis pour chaque
+   rangée, tu saisis **toi-même la liste exacte des numéros de sièges, dans l'ordre
+   gauche → droite** (ex : `12,10,8,6,4,2,1,3,5,7,9,11` pour une rangée qui part du
+   centre avec les pairs à gauche et les impairs à droite). Deux boutons t'aident à
+   remplir rapidement : *Suite 1,2,3…* (numérotation classique) et *Pair/impair
+   depuis le centre* (te demande combien de sièges de chaque côté et génère la
+   liste). Tu peux ensuite retoucher n'importe quel numéro à la main, ou simplement
+   ne pas inclure un numéro dans la liste pour retirer ce siège (ex : place PMR).
+   Une fois les rangées prêtes, clique sur *Générer les places manquantes* pour
+   créer chaque siège dans la base. Le bouton *Copier le plan de l'autre date*
+   permet de ne dessiner la salle qu'une fois.
 
    Deux fichiers `plan-samedi.json` et `plan-dimanche.json` sont fournis à la racine
-   du projet : ils reconstituent la structure du vrai plan du Théâtre de Sénart
-   (les 6 blocs, les lettres de rangées Q à Y en haut et A à P en bas). Utilise le
-   bouton *Importer un plan (.json)* dans l'onglet Plan de salle pour les charger
-   directement, un par date. **Les effectifs de sièges par rangée sont des
-   estimations** — je n'ai pas pu compter chaque siège individuellement avec une
-   précision totale sur l'image (grille très dense). Vérifie et ajuste les nombres
-   directement dans le tableau de chaque rangée avant de cliquer sur *Générer les
-   places* — c'est rapide, un chiffre à corriger par rangée si besoin.
+   du projet, reconstitués à partir de la fiche technique officielle du Théâtre de
+   Sénart (plan de masse) :
+   - 3 blocs de balcon (Gauche/Centre/Droit, rangées Q à Y), avec une numérotation
+     d'exemple partant du centre (pairs/impairs) — **à vérifier/corriger**.
+   - 4 paliers d'orchestre empilés du plus proche de la scène au fond de salle
+     (Rangs avant : A-D, Corbeille avant : E-J, Corbeille arrière : K-N, Fond de
+     salle : O-W), séparés par les allées de circulation visibles sur le plan
+     technique. **Les rangées sont définies mais volontairement vides de numéros**
+     — à toi de les saisir toi-même rangée par rangée (voir les boutons *Suite
+     1,2,3…* et *Pair/impair depuis le centre* pour aller plus vite).
+
+   Utilise le bouton *Importer un plan (.json)* dans l'onglet Plan de salle pour les
+   charger directement, un par date. Les noms, couleurs et prix de chaque palier sont
+   des exemples : adapte-les à ta grille tarifaire réelle.
 2. Après chaque vente sur Assoconnect, tu ajoutes une **transaction** dans l'onglet
    *Transactions* (en sélectionnant la bonne date en haut) : le numéro de transaction,
    la catégorie achetée, le nombre de places. Tu envoies ensuite au client le lien
@@ -78,14 +89,59 @@ séparés).
 > l'onglet "Règles > Playground" de la console Firebase avant l'ouverture de la
 > billetterie.
 
-### 2. Installation locale
+### 2. Envoi des billets par email (optionnel)
+
+Sur la page de confirmation, le client peut saisir son email pour recevoir aussi ses
+billets par ce biais, en plus du téléchargement direct. Ça passe par
+[EmailJS](https://www.emailjs.com/), qui permet d'envoyer un email directement depuis
+le navigateur, sans serveur ni backend à héberger.
+
+1. Crée un compte gratuit sur [emailjs.com](https://www.emailjs.com/).
+2. **Add an email service** : connecte ta boîte mail (Gmail, Outlook…) — c'est elle
+   qui apparaîtra comme expéditeur.
+3. **Email Templates > Create new template**. Dans l'éditeur, ajoute les variables
+   dont on a besoin, par exemple :
+   ```
+   Bonjour,
+
+   Voici vos billets pour {{event_name}} ({{event_dates}}) au {{venue_name}}.
+   Places : {{seats_summary}}
+   Numéro de transaction : {{transaction_id}}
+
+   À bientôt !
+   ```
+   Champ "To email" du template : `{{to_email}}`.
+4. Toujours dans l'éditeur du template, onglet **Attachments** : ajoute une pièce
+   jointe de type **Variable Attachment**, avec comme nom de paramètre
+   `pdf_attachment` (c'est exactement le nom que le code envoie), un nom de fichier
+   du type `billets-gala-mnt.pdf`, et le type de contenu `PDF`.
+5. Récupère les 3 identifiants dont l'app a besoin :
+   - **Service ID** (page du service ajouté à l'étape 2)
+   - **Template ID** (page du template créé à l'étape 3)
+   - **Public Key** (clique sur ton nom en haut à droite du tableau de bord EmailJS)
+6. Renseigne-les dans `.env` (`VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID`,
+   `VITE_EMAILJS_PUBLIC_KEY`) et dans les variables d'environnement Netlify.
+
+Si ces 3 variables ne sont pas renseignées, le champ email n'apparaît tout simplement
+pas sur la page de confirmation — le téléchargement direct du PDF continue de
+fonctionner normalement, avec ou sans cette config.
+
+> ⚠️ **Limite de taille importante** : le plan gratuit d'EmailJS limite les pièces
+> jointes dynamiques à **50 Ko**, ce qui est probablement trop juste pour ce PDF (les
+> logos et QR codes embarqués font déjà plus que ça à eux seuls, avant même de compter
+> les pages supplémentaires si plusieurs places sont achetées). Il te faudra très
+> probablement au moins le plan payant **Personal** d'EmailJS (limite à 500 Ko) pour
+> que l'envoi fonctionne de façon fiable, surtout pour les transactions à plusieurs
+> places. Fais un test avec une vraie transaction avant l'ouverture de la billetterie.
+
+### 3. Installation locale
 
 ```bash
 npm install
 npm run dev
 ```
 
-### 3. Déploiement sur Netlify
+### 4. Déploiement sur Netlify
 
 Comme pour l'appli de gestion du studio :
 
@@ -142,3 +198,9 @@ la **référence affichée sous le QR code** de chaque billet.
   sécurité renforcée si le volume de billets devient important.
 - Un tableau de bord "entrées en direct" (nombre de billets déjà scannés vs total)
   dans l'admin, en s'appuyant sur le champ `checkedIn` déjà présent sur chaque siège.
+
+## Plan de salle Canvas (v2)
+
+`src/components/SeatPlan.jsx` dessine maintenant le plan en Canvas (zoom au pincement/molette, déplacement, minimap, fiche du siège en bas d'écran). Il lit toujours la configuration de l'admin (blocs, position gridColumn/gridRow, rangées, numérotation manuelle) — rien à ressaisir. Les dimensions (espacement, courbure) se règlent en tête de `src/utils/venueLayout.js`.
+
+Nouvelle dépendance : `framer-motion` (→ `npm install`).

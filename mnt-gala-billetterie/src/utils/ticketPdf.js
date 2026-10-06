@@ -18,10 +18,13 @@ function qrPayload(seatId) {
   return `MNT-GALA|${seatId}`;
 }
 
+// Construit le document jsPDF (un billet par siège) sans l'enregistrer ni le
+// télécharger — réutilisé à la fois pour le téléchargement et pour l'envoi
+// par email.
 // event: { eventName, eventDates, venueName }
 // seats: [{ seatId, sectionName, row, number }]
 // transactionId: string (numéro de transaction saisi par le client)
-export async function generateTicketsPdf({ event, seats, transactionId }) {
+async function buildTicketsDoc({ event, seats, transactionId }) {
   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'landscape' });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -120,5 +123,18 @@ export async function generateTicketsPdf({ event, seats, transactionId }) {
     doc.text(ticketReference(seat.seatId), qrX + qrSize / 2 - 2, qrY + qrSize + 8, { align: 'center' });
   }
 
+  return doc;
+}
+
+// Génère le PDF et déclenche son téléchargement (bouton "Télécharger").
+export async function generateTicketsPdf({ event, seats, transactionId }) {
+  const doc = await buildTicketsDoc({ event, seats, transactionId });
   doc.save(`Billet-Gala-MNT-${transactionId}.pdf`);
+}
+
+// Génère le PDF et le renvoie en data URI base64 (pour l'envoi par email),
+// sans déclencher de téléchargement.
+export async function getTicketsPdfDataUri({ event, seats, transactionId }) {
+  const doc = await buildTicketsDoc({ event, seats, transactionId });
+  return doc.output('datauristring', { filename: `Billet-Gala-MNT-${transactionId}.pdf` });
 }

@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.3.3",
     "firebase": "^10.12.0",
+    "framer-motion": "^11.11.0",
     "jspdf": "^2.5.1",
     "jsqr": "^1.4.0",
     "qrcode": "^1.5.3",

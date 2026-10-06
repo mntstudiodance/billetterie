@@ -14,6 +14,7 @@ import { db } from '../firebase';
 import SeatPlan from '../components/SeatPlan';
 import Legend from '../components/Legend';
 import { generateTicketsPdf } from '../utils/ticketPdf';
+import { emailTickets, isEmailDeliveryConfigured } from '../utils/emailTickets';
 import { bookingDocId, eventLabel } from '../utils/events';
 
 const ERROR_MESSAGES = {
@@ -37,6 +38,9 @@ export default function ClientFlow({ eventId }) {
   const [seatsById, setSeatsById] = useState(new Map());
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [ticketSeats, setTicketSeats] = useState([]);
+  const [emailAddress, setEmailAddress] = useState('');
+  const [emailStatus, setEmailStatus] = useState('idle'); // idle | sending | sent | error
+  const [emailErrorMsg, setEmailErrorMsg] = useState('');
 
   // Charge le plan de salle de cette date (lecture publique)
   useEffect(() => {
@@ -167,6 +171,34 @@ export default function ClientFlow({ eventId }) {
     });
   }
 
+  async function handleEmailSend(e) {
+    e.preventDefault();
+    if (!emailAddress.trim()) return;
+    setEmailStatus('sending');
+    setEmailErrorMsg('');
+    try {
+      await emailTickets({
+        toEmail: emailAddress.trim(),
+        event: {
+          eventName: config?.eventName,
+          eventDates: eventLabel(eventId),
+          venueName: config?.venueName,
+        },
+        seats: ticketSeats,
+        transactionId,
+      });
+      setEmailStatus('sent');
+    } catch (err) {
+      console.error(err);
+      setEmailStatus('error');
+      setEmailErrorMsg(
+        err.message === 'EMAIL_NOT_CONFIGURED'
+          ? "L'envoi par email n'est pas configuré pour ce site."
+          : "L'envoi a échoué, merci de réessayer ou de télécharger le PDF directement."
+      );
+    }
+  }
+
   return (
     <div className="page">
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -218,6 +250,7 @@ export default function ClientFlow({ eventId }) {
             selectable
             allowedCategoryName={booking.category}
             selectedIds={selectedIds}
+            maxSelectable={booking.seatCount}
             onToggleSeat={toggleSeat}
           />
           <Legend sectionColor={allowedSection?.color} />
@@ -245,6 +278,32 @@ export default function ClientFlow({ eventId }) {
           <button className="btn btn-primary" onClick={handleDownload} style={{ marginTop: '1rem' }}>
             Télécharger mes billets (PDF)
           </button>
+
+          {isEmailDeliveryConfigured() && (
+            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #3a2c30' }}>
+              <p style={{ color: 'var(--cream-dim)', fontSize: '0.88rem', marginTop: 0 }}>
+                Vous pouvez aussi recevoir vos billets par email :
+              </p>
+              {emailStatus === 'sent' ? (
+                <p className="success-box">Billets envoyés à {emailAddress} ✓</p>
+              ) : (
+                <form onSubmit={handleEmailSend} style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="email"
+                    required
+                    value={emailAddress}
+                    onChange={(e) => setEmailAddress(e.target.value)}
+                    placeholder="votre@email.com"
+                    style={{ flex: 1 }}
+                  />
+                  <button className="btn btn-small" type="submit" disabled={emailStatus === 'sending'}>
+                    {emailStatus === 'sending' ? 'Envoi…' : 'Envoyer'}
+                  </button>
+                </form>
+              )}
+              {emailStatus === 'error' && <div className="error-box">{emailErrorMsg}</div>}
+            </div>
+          )}
         </div>
       )}
     </div>
