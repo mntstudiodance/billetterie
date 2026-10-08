@@ -8,6 +8,7 @@ import {
   query,
   runTransaction,
   serverTimestamp,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -91,6 +92,8 @@ export default function ClientFlow({ eventId }) {
         );
         const seats = seatDocs.filter((d) => d.exists()).map((d) => ({ seatId: d.id, ...d.data() }));
         setTicketSeats(seats);
+        // noms déjà enregistrés lors d'une précédente émission
+        setHolders(Object.fromEntries(seats.filter((x) => x.holder).map((x) => [x.seatId, x.holder])));
         setStep('success');
       } else {
         setStep('selecting');
@@ -167,8 +170,22 @@ export default function ClientFlow({ eventId }) {
   const namedSeats = ticketSeats.map((s) => ({ ...s, holder: (holders[s.seatId] || '').trim() }));
   const allNamed = ticketSeats.length > 0 && namedSeats.every((s) => s.holder.length >= 2);
 
+  // Enregistre les noms en base (une seule fois par billet) pour pouvoir
+  // régénérer le PDF plus tard depuis l'admin. Non bloquant en cas d'échec.
+  async function persistHolders() {
+    const pending = namedSeats.filter((s, i) => !ticketSeats[i].holder);
+    if (pending.length === 0) return;
+    try {
+      await Promise.all(pending.map((s) => updateDoc(doc(db, 'seats', s.seatId), { holder: s.holder })));
+      setTicketSeats((prev) => prev.map((t) => ({ ...t, holder: t.holder || (holders[t.seatId] || '').trim() })));
+    } catch (err) {
+      console.error('Enregistrement des noms impossible :', err);
+    }
+  }
+
   async function handleDownload() {
     if (!allNamed) return;
+    await persistHolders();
     await generateTicketsPdf({
       event: {
         eventName: config?.eventName,
@@ -183,6 +200,7 @@ export default function ClientFlow({ eventId }) {
   async function handleEmailSend(e) {
     e.preventDefault();
     if (!emailAddress.trim() || !allNamed) return;
+    await persistHolders();
     setEmailStatus('sending');
     setEmailErrorMsg('');
     try {
@@ -299,6 +317,7 @@ export default function ClientFlow({ eventId }) {
                   required
                   placeholder="Nom et prénom"
                   value={holders[s.seatId] || ''}
+                  disabled={!!s.holder}
                   onChange={(e) => setHolders((h) => ({ ...h, [s.seatId]: e.target.value }))}
                   style={{ width: '100%', boxSizing: 'border-box' }}
                 />

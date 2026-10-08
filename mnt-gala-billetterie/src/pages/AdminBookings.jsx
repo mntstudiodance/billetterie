@@ -13,7 +13,8 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { EVENTS, bookingDocId } from '../utils/events';
+import { EVENTS, bookingDocId, eventLabel } from '../utils/events';
+import { generateTicketsPdf } from '../utils/ticketPdf';
 
 export default function AdminBookings() {
   const [eventId, setEventId] = useState(EVENTS[0].id);
@@ -110,6 +111,31 @@ export default function AdminBookings() {
       });
     }
     await batch.commit();
+  }
+
+  // Régénère le PDF d'une transaction (billets perdus) à partir des sièges en base
+  async function handleDownloadPdf(booking) {
+    setMessage('');
+    try {
+      const snaps = await Promise.all((booking.seatIds || []).map((sid) => getDoc(doc(db, 'seats', sid))));
+      const seats = snaps.filter((d) => d.exists()).map((d) => ({ seatId: d.id, ...d.data(), holder: d.data().holder || '' }));
+      if (seats.length === 0) {
+        setMessage('Aucun siège trouvé pour cette transaction.');
+        return;
+      }
+      await generateTicketsPdf({
+        event: {
+          eventName: config?.eventName,
+          eventDates: eventLabel(booking.eventId || eventId),
+          venueName: config?.venueName,
+        },
+        seats,
+        transactionId: booking.transactionNumber || booking.id,
+      });
+    } catch (err) {
+      console.error(err);
+      setMessage(`Impossible de générer le PDF : ${err.message}`);
+    }
   }
 
   async function handleReset(booking) {
@@ -240,6 +266,11 @@ export default function AdminBookings() {
                 </td>
                 <td>{(b.seatIds || []).map((sid) => sid.split('-').slice(1).join('-')).join(', ') || '—'}</td>
                 <td style={{ display: 'flex', gap: '0.4rem' }}>
+                  {b.status === 'completed' && (
+                    <button className="btn btn-small" onClick={() => handleDownloadPdf(b)}>
+                      PDF
+                    </button>
+                  )}
                   {b.status === 'completed' && (
                     <button className="btn btn-small" onClick={() => handleReset(b)}>
                       Réinitialiser
