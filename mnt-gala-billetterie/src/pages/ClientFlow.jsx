@@ -227,7 +227,7 @@ export default function ClientFlow({ eventId }) {
   }
 
   return (
-    <div className="page">
+    <div className={step === 'entry' ? 'page page-hero' : 'page'}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <div className="eyebrow">Billetterie — {eventLabel(eventId)}</div>
         <h1 style={{ fontSize: '2rem' }}>{config?.eventName || 'Gala MNT Studio Dance'}</h1>

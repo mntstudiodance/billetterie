@@ -5,7 +5,7 @@ export default function EventChooser() {
   const navigate = useNavigate();
 
   return (
-    <div className="page">
+    <div className="page page-hero">
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
         <div className="eyebrow">Billetterie</div>
         <h1 style={{ fontSize: '2rem' }}>Gala MNT Studio Dance</h1>
