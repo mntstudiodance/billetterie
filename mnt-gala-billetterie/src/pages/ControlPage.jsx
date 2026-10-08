@@ -4,6 +4,7 @@ import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { eventLabel } from '../utils/events';
 import { formatSeatLabel } from '../utils/seatMap';
+import { unlockAudio, isAudioReady, playSuccess, playError } from '../utils/scanSound';
 
 function extractSeatId(raw) {
   const text = raw.trim();
@@ -33,6 +34,28 @@ export default function ControlPage() {
   const [manualInput, setManualInput] = useState('');
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState(null); // { ok: bool, title, detail, seat }
+  const [soundOn, setSoundOn] = useState(true);
+  const [audioReady, setAudioReady] = useState(false);
+
+  // Son : le navigateur impose un toucher avant d'autoriser l'audio
+  function enableSound() {
+    unlockAudio();
+    setAudioReady(isAudioReady());
+    setSoundOn(true);
+    playSuccess();
+  }
+  useEffect(() => {
+    const unlock = () => { unlockAudio(); setAudioReady(isAudioReady()); };
+    window.addEventListener('pointerdown', unlock);
+    return () => window.removeEventListener('pointerdown', unlock);
+  }, []);
+
+  // Un son à chaque résultat : valide = ding-ding, sinon (déjà scanné, inconnu, erreur) = buzzer
+  useEffect(() => {
+    if (!result || !soundOn) return;
+    if (result.ok) playSuccess();
+    else playError();
+  }, [result, soundOn]);
 
   useEffect(() => {
     let cancelled = false;
@@ -170,6 +193,21 @@ export default function ControlPage() {
           <video ref={videoRef} playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         {cameraError && <div className="error-box">{cameraError}</div>}
+
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1rem' }}>
+          <button
+            type="button"
+            className="btn btn-small"
+            onClick={() => (soundOn && audioReady ? setSoundOn(false) : enableSound())}
+          >
+            {soundOn && audioReady ? '🔊 Son activé' : soundOn ? '🔇 Touchez pour activer le son' : '🔇 Son coupé'}
+          </button>
+          {soundOn && audioReady && (
+            <button type="button" className="btn btn-small" onClick={() => { playSuccess(); setTimeout(playError, 700); }}>
+              Tester
+            </button>
+          )}
+        </div>
 
         <form onSubmit={handleManualSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
           <input
