@@ -217,3 +217,29 @@ th {
   background: rgba(91, 140, 90, 0.18);
   color: #9fd19e;
 }
+
+/* Fond photo de la salle pour les pages d'accueil (choix de la date, saisie du numéro) */
+.page-hero {
+  position: relative;
+  isolation: isolate;
+}
+.page-hero::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(21, 15, 16, 0.5) 0%, rgba(21, 15, 16, 0.78) 70%, rgba(21, 15, 16, 0.92) 100%),
+    url('/fond-salle.jpg') center / cover no-repeat;
+}
+.page-hero h1,
+.page-hero .eyebrow {
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
+}
+.page-hero .card {
+  background: rgba(32, 22, 25, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(201, 162, 75, 0.4);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
